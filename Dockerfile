@@ -166,7 +166,7 @@ EXPOSE 7860 8888
 USER $UID
 
 STOPSIGNAL SIGINT
-
+RUN chmod +x /app/run.sh
 # Use dumb-init as PID 1 to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["/app/run.sh"]

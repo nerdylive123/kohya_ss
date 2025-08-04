@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 # Default values
@@ -12,12 +12,12 @@ python3 kohya_gui.py \
     --headless \
     --noverify &
 
-local JUPYTER_PASSWORD=${JUPYTER_PASSWORD:-${JUPYTER_LAB_PASSWORD:-}}
+JUPYTER_PASSWORD=${JUPYTER_PASSWORD:-${JUPYTER_LAB_PASSWORD:-}}
 
 mkdir -p "$LOG_DIR"
 
     # Use array for complex command
-local jupyter_cmd=(
+jupyter_cmd=(
         jupyter lab
         --allow-root
         --no-browser
