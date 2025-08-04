@@ -34,7 +34,7 @@ RUN --mount=type=cache,id=apt-$TARGETARCH$TARGETVARIANT,sharing=locked,target=/v
     # !If you experience any related issues, replace the following line with `cuda-12-8` to obtain the complete CUDA package.
     cuda-nvcc-12-8
 
-ENV PATH="/usr/local/cuda/bin${PATH:+:${PATH}}"
+ENV PATH="/usr/local/cuda/bin:$PATH"
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64
 ENV CUDA_VERSION=12.8
 ENV NVIDIA_REQUIRE_CUDA=cuda>=12.8
@@ -74,7 +74,7 @@ RUN --mount=type=cache,id=uv-$TARGETARCH$TARGETVARIANT,sharing=locked,target=/ro
     uv venv --system-site-packages /venv && \
     uv pip install --no-deps \
     # torch (1.0GiB)
-    torch==2.7.0+cu128 \ 
+    torch==2.7.0+cu128 \
     # triton (149.3MiB)
     triton>=3.1.0 \
     # tensorflow (615.0MiB)
@@ -98,6 +98,10 @@ RUN --mount=type=cache,id=apt-$TARGETARCH$TARGETVARIANT,sharing=locked,target=/v
     uv pip uninstall pillow && \
     CC="cc -mavx2" uv pip install pillow-simd; \
     fi
+
+# Install jupyterlab
+RUN --mount=type=cache,id=uv-$TARGETARCH$TARGETVARIANT,sharing=locked,target=/root/.cache/uv \
+    uv pip install jupyterlab
 
 ########################################
 # Final stage
@@ -137,10 +141,10 @@ COPY --link --chmod=775 LICENSE.md /licenses/LICENSE.md
 COPY --link --chown=$UID:0 --chmod=775 --from=build /venv /venv
 COPY --link --chown=$UID:0 --chmod=775 . /app
 
-ENV PATH="/venv/bin${PATH:+:${PATH}}"
+ENV PATH="/venv/bin:$PATH"
 ENV PYTHONPATH="/venv/lib/python3.11/site-packages"
 
-ENV LD_LIBRARY_PATH="/venv/lib/python3.11/site-packages/nvidia/cudnn/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+ENV LD_LIBRARY_PATH="/venv/lib/python3.11/site-packages/nvidia/cudnn/lib:$LD_LIBRARY_PATH"
 ENV LD_PRELOAD=libtcmalloc.so
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 
@@ -154,7 +158,8 @@ WORKDIR /app
 VOLUME [ "/dataset" ]
 
 # 7860: Kohya GUI
-EXPOSE 7860
+# 8888: JupyterLab
+EXPOSE 7860 8888
 
 USER $UID
 
@@ -162,7 +167,7 @@ STOPSIGNAL SIGINT
 
 # Use dumb-init as PID 1 to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["python3", "kohya_gui.py", "--listen", "0.0.0.0", "--server_port", "7860", "--headless", "--noverify"]
+CMD ["sh", "-c", "python3 kohya_gui.py --listen 0.0.0.0 --server_port 7860 --headless --noverify & jupyter lab --ip=0.0.0.0 --port=8888 --allow-root --ServerApp.password=\"$JUPYTER_PASSWORD\""]
 
 ARG VERSION
 ARG RELEASE
