@@ -4,9 +4,6 @@ set -e
 # Default values
 KOHYA_LISTEN_ADDRESS=${KOHYA_LISTEN_ADDRESS:-"0.0.0.0"}
 KOHYA_SERVER_PORT=${KOHYA_SERVER_PORT:-"7860"}
-JUPYTER_IP=${JUPYTER_IP:-"0.0.0.0"}
-JUPYTER_PORT=${JUPYTER_PORT:-"8888"}
-JUPYTER_PASSWORD=${JUPYTER_PASSWORD:-""}
 
 # Start Kohya's GUI in the background
 python3 kohya_gui.py \
@@ -15,11 +12,25 @@ python3 kohya_gui.py \
     --headless \
     --noverify &
 
-# Start JupyterLab in the foreground
-# It will read JUPYTER_PASSWORD from the environment
-exec jupyter lab \
-    --ip="${JUPYTER_IP}" \
-    --port="${JUPYTER_PORT}" \
-    --allow-root \
-    --ServerApp.password="${JUPYTER_PASSWORD}"
+local JUPYTER_PASSWORD=${JUPYTER_PASSWORD:-${JUPYTER_LAB_PASSWORD:-}}
 
+mkdir -p "$LOG_DIR"
+
+    # Use array for complex command
+local jupyter_cmd=(
+        jupyter lab
+        --allow-root
+        --no-browser
+        --port="$JUPYTER_PORT"
+        --ip=*
+        --FileContentsManager.delete_to_trash=False
+        --ContentsManager.allow_hidden=True
+        --ServerApp.terminado_settings='{"shell_command":["/bin/bash"]}'
+        --ServerApp.token="${JUPYTER_PASSWORD}"
+        --ServerApp.password="${JUPYTER_PASSWORD}"
+        --ServerApp.allow_origin=*
+        --ServerApp.preferred_dir=/workspace
+    )
+
+# Start Jupyter Lab
+exec "${jupyter_cmd[@]}" 2>&1 | tee "$LOG_DIR/jupyter.log
