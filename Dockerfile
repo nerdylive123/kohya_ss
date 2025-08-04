@@ -141,6 +141,8 @@ COPY --link --chmod=775 LICENSE.md /licenses/LICENSE.md
 COPY --link --chown=$UID:0 --chmod=775 --from=build /venv /venv
 COPY --link --chown=$UID:0 --chmod=775 . /app
 
+RUN chmod +x /app/run.sh
+
 ENV PATH="/venv/bin:$PATH"
 ENV PYTHONPATH="/venv/lib/python3.11/site-packages"
 
@@ -167,7 +169,7 @@ STOPSIGNAL SIGINT
 
 # Use dumb-init as PID 1 to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["sh", "-c", "python3 kohya_gui.py --listen 0.0.0.0 --server_port 7860 --headless --noverify & jupyter lab --ip=0.0.0.0 --port=8888 --allow-root --ServerApp.password=\"$JUPYTER_PASSWORD\""]
+CMD ["/app/run.sh"]
 
 ARG VERSION
 ARG RELEASE
