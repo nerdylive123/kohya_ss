@@ -4,6 +4,8 @@ set -e
 # Default values
 KOHYA_LISTEN_ADDRESS=${KOHYA_LISTEN_ADDRESS:-"0.0.0.0"}
 KOHYA_SERVER_PORT=${KOHYA_SERVER_PORT:-"7860"}
+JUPYTER_PORT=${JUPYTER_PORT:-"8888"}
+LOG_DIR=${LOG_DIR:-"/app/logs"}
 
 # Start Kohya's GUI in the background
 python3 kohya_gui.py \
@@ -33,4 +35,4 @@ jupyter_cmd=(
     )
 
 # Start Jupyter Lab
-exec "${jupyter_cmd[@]}" 2>&1 | tee "$LOG_DIR/jupyter.log
+exec "${jupyter_cmd[@]}" 2>&1 | tee "$LOG_DIR/jupyter.log"
