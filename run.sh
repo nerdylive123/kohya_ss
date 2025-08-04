@@ -7,9 +7,6 @@ KOHYA_SERVER_PORT=${KOHYA_SERVER_PORT:-"7860"}
 JUPYTER_PORT=${JUPYTER_PORT:-"8888"}
 LOG_DIR=${LOG_DIR:-"/app/logs"}
 
-# Create workspace directory if it doesn't exist
-mkdir -p /tmp
-
 # Start Kohya's GUI in the background
 python3 kohya_gui.py \
     --listen "${KOHYA_LISTEN_ADDRESS}" \
@@ -34,7 +31,7 @@ jupyter_cmd=(
     --ServerApp.token="${JUPYTER_PASSWORD}"
     --ServerApp.password="${JUPYTER_PASSWORD}"
     --ServerApp.allow_origin=*
-    --FileContentsManager.preferred_dir=/tmp
+    --FileContentsManager.preferred_dir=/app/tmp
 )
 
 # Start Jupyter Lab

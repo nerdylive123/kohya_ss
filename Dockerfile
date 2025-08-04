@@ -132,7 +132,8 @@ RUN groupadd -g $UID $UID && \
 RUN install -d -m 775 -o $UID -g 0 /dataset && \
     install -d -m 775 -o $UID -g 0 /licenses && \
     install -d -m 775 -o $UID -g 0 /app && \
-    install -d -m 775 -o $UID -g 0 /venv
+    install -d -m 775 -o $UID -g 0 /venv && \
+    install -d -m 775 -o $UID -g 0 /app/tmp
 
 # Copy licenses (OpenShift Policy)
 COPY --link --chmod=775 LICENSE.md /licenses/LICENSE.md
